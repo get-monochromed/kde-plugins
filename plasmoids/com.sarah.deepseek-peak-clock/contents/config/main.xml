@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  KConfig XT schema for the DeepSeek Peak-Time Clock.
+  Keys match PLAN.md §6. All entries are read/written at runtime via
+  plasmoid.configuration.<key> (emits "changed" / valueChanged on write).
+
+  LOCAL MODIFICATION (2026-09): the "mode" entry (panel "regular" dot+text vs
+  "compact" dot) is gone — the panel shows the DeepSeek whale only, so there
+  is no panel text to toggle. The label/colour entries below now affect the
+  flyout, the dial and the hover tooltip only.
+-->
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <kcfgfile name=""/>
+  <group name="General">
+    <entry name="timeZone" type="String">
+      <default>System</default>
+    </entry>
+    <entry name="peakColor" type="Color">
+      <default>#e53935</default>
+    </entry>
+    <entry name="offPeakColor" type="Color">
+      <default>#43a047</default>
+    </entry>
+    <entry name="flatColor" type="Color">
+      <default>#fb8c00</default>
+    </entry>
+    <entry name="peakLabel" type="String">
+      <default>PEAK</default>
+    </entry>
+    <entry name="offPeakLabel" type="String">
+      <default>OFF-PEAK</default>
+    </entry>
+    <entry name="flatLabel" type="String">
+      <default>FLAT</default>
+    </entry>
+    <entry name="showCountdown" type="Bool">
+      <default>true</default>
+    </entry>
+    <entry name="refreshInterval" type="Int">
+      <default>15</default>
+    </entry>
+    <entry name="peakWindows" type="String">
+      <default></default>
+    </entry>
+  </group>
+</kcfg>

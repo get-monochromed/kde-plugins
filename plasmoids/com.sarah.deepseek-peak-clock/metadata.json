@@ -1,0 +1,21 @@
+{
+    "KPlugin": {
+        "Id": "com.sarah.deepseek-peak-clock",
+        "Name": "DeepSeek Peak-Time Clock",
+        "Description": "Shows whether DeepSeek API billing is currently peak or off-peak, with a 24-hour dial of the official UTC windows",
+        "Icon": "clock",
+        "Authors": [
+            {
+                "Name": "Sarah Schmidt (Github: SAI-DAEMON)"
+            }
+        ],
+        "Version": "2.7",
+        "License": "MIT",
+        "Website": "https://github.com/Sai-daemon/KDE-Deepseek-Peaktime-clock",
+        "BugReportUrl": "https://github.com/Sai-daemon/KDE-Deepseek-Peaktime-clock/issues",
+        "Category": "Date and Time",
+        "EnabledByDefault": true
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "KPackageStructure": "Plasma/Applet"
+}
