@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Id": "center-window-above-dock",
+        "Name": "Center Window (above panels)",
+        "Description": "Centers the active window in the screen's usable area (panels excluded) and nudges it up by a configurable offset so it clears a bottom dock.",
+        "Icon": "preferences-system-windows-script-test",
+        "License": "MIT",
+        "Version": "1.0",
+        "Authors": [
+            { "Name": "monochrome" }
+        ],
+        "EnabledByDefault": false
+    },
+    "X-Plasma-API": "javascript"
+}

@@ -1,0 +1,16 @@
+{
+    "KPlugin": {
+        "Id": "com.monochrome.todos",
+        "Name": "Todos",
+        "Description": "Daily to-do list with per-task check-in reminders (low every 10 min, medium every 30 min, high every 2 h).",
+        "Icon": "view-task",
+        "Authors": [
+            { "Name": "monochrome" }
+        ],
+        "Version": "0.1.0",
+        "License": "MIT",
+        "Category": "Utilities"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "KPackageStructure": "Plasma/Applet"
+}
