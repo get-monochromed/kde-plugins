@@ -116,6 +116,11 @@ Item {
         ListView {
             id: listView
             Layout.fillWidth: true
+            // The flyout is resizable: absorb every spare pixel of height here so
+            // resizing reveals more tasks instead of inflating the gaps between the
+            // chrome. Without this the layout drains the surplus into its spacing
+            // and the whole widget looks like its padding scales with the popup.
+            Layout.fillHeight: true
             Layout.preferredHeight: Math.min(contentHeight, Kirigami.Units.gridUnit * 16)
             clip: true
             spacing: Kirigami.Units.smallSpacing
