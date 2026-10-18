@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# send-ensure — keep Packet and LocalSend running.
+#
+#   send-ensure          watchdog loop (what send-apps.service runs)
+#   send-ensure --once   single pass, then exit
+#
+# Both apps are Flatpak, and flatpak moves the app into its own
+# app-flatpak-*.scope, so a systemd unit wrapping `flatpak run` does not really
+# own the process. This polls instead: whatever is missing gets started, and
+# something that died comes back within one interval.
+
+set -uo pipefail
+
+interval=30
+
+packet_running() {
+    gdbus call --session \
+        --dest org.freedesktop.DBus \
+        --object-path /org/freedesktop/DBus \
+        --method org.freedesktop.DBus.NameHasOwner \
+        io.github.nozwock.Packet 2>/dev/null | grep -qx '(true,)'
+}
+
+localsend_running() {
+    pgrep -x localsend >/dev/null 2>&1
+}
+
+start_packet() {
+    packet_running && return 0
+    echo "starting Packet"
+    setsid flatpak run --command=packet io.github.nozwock.Packet --background \
+        >/dev/null 2>&1 </dev/null &
+}
+
+start_localsend() {
+    localsend_running && return 0
+    echo "starting LocalSend"
+    setsid flatpak run --command=localsend org.localsend.localsend_app --hidden \
+        >/dev/null 2>&1 </dev/null &
+}
+
+one_pass() {
+    start_packet
+    start_localsend
+}
+
+if [ "${1:-}" = "--once" ]; then
+    one_pass
+    exit 0
+fi
+
+trap 'exit 0' TERM INT
+while :; do
+    one_pass
+    sleep "$interval" &
+    wait $!
+done

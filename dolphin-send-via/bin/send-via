@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# send-via — hand files selected in Dolphin to Packet or LocalSend.
+#
+#   send-via packet   FILE...
+#   send-via localsend FILE...
+#
+# Called from the Dolphin service menus (see ~/.local/share/kio/servicemenus/).
+# Runs with no terminal, so every failure has to surface through kdialog.
+
+set -uo pipefail
+
+APP="${1:-}"
+[ "$#" -gt 0 ] && shift
+
+die() {
+    kdialog --title "Send via" --error "$1" 2>/dev/null \
+        || printf 'send-via: %s\n' "$1" >&2
+    exit 1
+}
+
+case "$APP" in
+    packet | localsend) ;;
+    *) die "Unknown target '${APP}'. Expected 'packet' or 'localsend'." ;;
+esac
+
+[ "$#" -gt 0 ] || die "No files were given."
+
+files=()
+for f in "$@"; do
+    [ -e "$f" ] || die "No such file:\n$f"
+    if [ "$APP" = packet ] && [ -d "$f" ]; then
+        die "Packet can only send files, not folders:\n$f"
+    fi
+    files+=("$(realpath -e -- "$f")")
+done
+
+# ---------------------------------------------------------------- LocalSend
+# LocalSend's GUI parses plain paths from argv (File(arg).existsSync()); it does
+# NOT understand file:// URIs, so the forwards must be the non-URI form.
+# --file-forwarding hands the paths to the sandbox through the document portal,
+# so no filesystem permission has to be granted to the app.
+if [ "$APP" = localsend ]; then
+    setsid flatpak run --file-forwarding org.localsend.localsend_app \
+        @@ "${files[@]}" @@ >/dev/null 2>&1 </dev/null &
+    exit 0
+fi
+
+# ------------------------------------------------------------------- Packet
+# Packet has no CLI for files. It exports a GAction ("send-files", type 'as')
+# through its DBus connection at /io/github/nozwock/Packet/Share, which is what
+# its own Nautilus plugin uses. The paths are resolved inside Packet's sandbox,
+# which is why it needs read access to the host (flatpak override host:ro).
+has_owner() {
+    gdbus call --session \
+        --dest org.freedesktop.DBus \
+        --object-path /org/freedesktop/DBus \
+        --method org.freedesktop.DBus.NameHasOwner \
+        io.github.nozwock.Packet 2>/dev/null | grep -qx '(true,)'
+}
+
+action_ready() {
+    gdbus introspect --session \
+        --dest io.github.nozwock.Packet \
+        --object-path /io/github/nozwock/Packet/Share >/dev/null 2>&1
+}
+
+if ! has_owner; then
+    setsid flatpak run --command=packet io.github.nozwock.Packet --background \
+        >/dev/null 2>&1 </dev/null &
+    for _ in $(seq 1 60); do
+        has_owner && break
+        sleep 0.25
+    done
+    has_owner || die "Packet did not start (timed out waiting for it on the session bus)."
+fi
+
+# Give the freshly started instance a moment to export its action group.
+for _ in $(seq 1 40); do
+    action_ready && break
+    sleep 0.25
+done
+
+# Build the GVariant for Activate(s, av, a{sv}): one variant holding an 'as'.
+items=""
+sep=""
+for f in "${files[@]}"; do
+    esc=${f//\\/\\\\}
+    esc=${esc//\'/\\\'}
+    items+="${sep}'${esc}'"
+    sep=","
+done
+payload="[<[${items}]>]"
+
+if ! err=$(gdbus call --session \
+        --dest io.github.nozwock.Packet \
+        --object-path /io/github/nozwock/Packet/Share \
+        --method org.gtk.Actions.Activate \
+        send-files "$payload" '{}' 2>&1); then
+    die "Packet rejected the request:\n$err"
+fi
+
+exit 0

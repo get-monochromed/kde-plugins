@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Service
+X-KDE-ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/all;
+Actions=sendViaPacket;
+X-KDE-Priority=TopLevel
+Name=Send via Packet
+Icon=io.github.nozwock.Packet
+
+[Desktop Action sendViaPacket]
+Name=Send via Packet
+Icon=io.github.nozwock.Packet
+Exec=__HOME__/.local/bin/send-via packet %F

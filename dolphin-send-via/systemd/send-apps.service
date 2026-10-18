@@ -1,0 +1,15 @@
+[Unit]
+Description=Keep Packet and LocalSend running
+Documentation=https://github.com/nozwock/packet https://localsend.org
+After=graphical-session.target
+Wants=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=__HOME__/.local/bin/send-ensure
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
